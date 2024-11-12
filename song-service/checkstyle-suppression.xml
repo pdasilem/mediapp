@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!DOCTYPE suppressions PUBLIC
+        "-//Checkstyle//DTD SuppressionXpathFilter Experimental Configuration 1.2//EN"
+        "https://checkstyle.org/dtds/suppressions_xpath_1_2.dtd">
+<suppressions>
+    <suppress
+            checks=".*"
+            query="/CLASS_DEF[./ANNOTATIONS/ANNOTATION/IDENT[
+            @text='Generated' or
+            @text='javax.annotation.Generated' or
+            @text='javax.annotation.processing.Generated'
+        ]]"/>
+</suppressions>

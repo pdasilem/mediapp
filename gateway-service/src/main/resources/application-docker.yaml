@@ -1,0 +1,25 @@
+server:
+  port: ${GATEWAY_SERVICE_PORT:8080}
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: resource-service
+          uri: lb://resource-service
+          predicates:
+            - Path=/resources/**
+        - id: song-service
+          uri: lb://song-service
+          predicates:
+            - Path=/songs/**
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery-service:${DISCOVERY_SERVICE_PORT:8083}/eureka/
+  instance:
+    prefer-ip-address: true
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG

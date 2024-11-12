@@ -1,0 +1,29 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: song-service
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5433/song_db
+    username: postuser
+    password: paSS1word
+  flyway:
+    schemas: song_db
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    enabled: true
+    clean-disabled: false
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8083/eureka
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
