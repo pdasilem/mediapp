@@ -44,7 +44,7 @@ class Mp3ControllerTest {
         ResponseEntity<ResourceIdResponse> result = mp3Controller.uploadResource(audioData);
 
         assertEquals(ResponseEntity.ok(response), result);
-        verify(mp3Validator).validate(audioData);
+        verify(mp3Validator).validateAudioData(audioData);
         verify(resourceService).saveResource(audioData);
     }
 

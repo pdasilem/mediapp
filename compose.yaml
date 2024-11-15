@@ -12,7 +12,6 @@ services:
       timeout: 2s
       retries: 5
     volumes:
-      - resource_pgdata:/var/lib/postgresql/data
       - ./init-scripts/resource-db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - mediapp-network
@@ -30,7 +29,6 @@ services:
       timeout: 2s
       retries: 5
     volumes:
-      - song_pgdata:/var/lib/postgresql/data
       - ./init-scripts/song-db/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - mediapp-network
@@ -94,6 +92,3 @@ services:
 
 networks:
   mediapp-network:
-volumes:
-  resource_pgdata:
-  song_pgdata:

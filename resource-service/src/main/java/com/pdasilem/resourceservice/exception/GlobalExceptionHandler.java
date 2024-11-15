@@ -1,11 +1,13 @@
 package com.pdasilem.resourceservice.exception;
 
-import lombok.extern.slf4j.Slf4j;
+import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -27,7 +29,9 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({InvalidMp3Exception.class, InvalidCsvException.class})
+    @ExceptionHandler({InvalidMp3Exception.class, InvalidCsvException.class, HttpMediaTypeNotSupportedException.class
+            , TypeMismatchDataAccessException.class,
+            MethodArgumentTypeMismatchException.class, ConstraintViolationException.class, InvalidIdException.class})
     public ResponseEntity<GenericErrorResponse> handleBadRequestExceptions(Exception exception) {
         return buildErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }

@@ -13,7 +13,7 @@ spring:
     schemas: song_db
     locations: classpath:db/migration
     baseline-on-migrate: true
-    enabled: true
+    enabled: false
     clean-disabled: false
 
 eureka:

@@ -16,7 +16,7 @@ spring:
   flyway:
     locations: classpath:db/migration
     baseline-on-migrate: true
-    enabled: true
+    enabled: false
     clean-disabled: false
 
 eureka:

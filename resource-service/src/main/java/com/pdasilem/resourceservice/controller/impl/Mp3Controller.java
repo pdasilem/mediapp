@@ -20,12 +20,13 @@ public class Mp3Controller implements ResourceController {
 
     @Override
     public ResponseEntity<ResourceIdResponse> uploadResource(byte[] audioData) {
-        mp3Validator.validate(audioData);
+        mp3Validator.validateAudioData(audioData);
         return ResponseEntity.ok(resourceService.saveResource(audioData));
     }
 
     @Override
     public ResponseEntity<byte[]> getResourceById(Integer id) {
+        mp3Validator.validatePositiveId(id);
         return ResponseEntity.ok(resourceService.getResourceById(id));
     }
 
