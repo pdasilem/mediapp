@@ -1,11 +1,13 @@
 package com.pdasilem.songservice.model;
 
-import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.relational.core.mapping.Table;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
 
-@Table("song_metadata")
-@Data
+@Entity(name = "song_metadata")
+@Getter
+@Setter
 public class SongMetadata {
 
     @Id
@@ -13,7 +15,6 @@ public class SongMetadata {
     String name;
     String artist;
     String album;
-    String length;
-    Integer resourceId;
+    String duration;
     Integer year;
 }

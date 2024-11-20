@@ -1,5 +1,6 @@
 package com.pdasilem.resourceservice.exception;
 
+import com.pdasilem.resourceservice.exception.response.GenericErrorResponse;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.TypeMismatchDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -12,9 +13,9 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler({RuntimeException.class, Exception.class, InternalServerException.class})
     public ResponseEntity<GenericErrorResponse> handleCommonException(Exception exception) {
-        return buildErrorResponse("An internal server error has occurred: " + exception.getMessage(),
+        return buildErrorResponse("An error occurred on the server: " + exception.getMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -29,9 +30,9 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler({InvalidMp3Exception.class, InvalidCsvException.class, HttpMediaTypeNotSupportedException.class
-            , TypeMismatchDataAccessException.class,
-            MethodArgumentTypeMismatchException.class, ConstraintViolationException.class, InvalidIdException.class})
+    @ExceptionHandler({InvalidMp3Exception.class, InvalidCsvException.class, HttpMediaTypeNotSupportedException.class,
+            TypeMismatchDataAccessException.class, MethodArgumentTypeMismatchException.class,
+            ConstraintViolationException.class, InvalidIdException.class})
     public ResponseEntity<GenericErrorResponse> handleBadRequestExceptions(Exception exception) {
         return buildErrorResponse(exception.getMessage(), HttpStatus.BAD_REQUEST);
     }

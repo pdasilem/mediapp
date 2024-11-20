@@ -1,8 +1,8 @@
 package com.pdasilem.resourceservice.controller;
 
 import com.pdasilem.resourceservice.controller.impl.Mp3Controller;
-import com.pdasilem.resourceservice.dto.DeletedResourcesResponse;
-import com.pdasilem.resourceservice.dto.ResourceIdResponse;
+import com.pdasilem.resourceservice.dto.DeletedResourceIdsResponse;
+import com.pdasilem.resourceservice.dto.IdResponse;
 import com.pdasilem.resourceservice.service.ResourceService;
 import com.pdasilem.resourceservice.util.CsvValidator;
 import com.pdasilem.resourceservice.util.Mp3Validator;
@@ -38,10 +38,10 @@ class Mp3ControllerTest {
     @Test
     void testUploadResource() {
         byte[] audioData = new byte[]{1, 2, 3};
-        ResourceIdResponse response = new ResourceIdResponse(1);
+        IdResponse response = new IdResponse(1);
         when(resourceService.saveResource(any(byte[].class))).thenReturn(response);
 
-        ResponseEntity<ResourceIdResponse> result = mp3Controller.uploadResource(audioData);
+        ResponseEntity<IdResponse> result = mp3Controller.uploadResource(audioData);
 
         assertEquals(ResponseEntity.ok(response), result);
         verify(mp3Validator).validateAudioData(audioData);
@@ -63,10 +63,10 @@ class Mp3ControllerTest {
     @Test
     void testDeleteResourcesByIds() {
         String ids = "1,2,3";
-        DeletedResourcesResponse response = new DeletedResourcesResponse(List.of(1, 2, 3));
+        DeletedResourceIdsResponse response = new DeletedResourceIdsResponse(List.of(1, 2, 3));
         when(resourceService.deleteResourceByIds(ids)).thenReturn(response);
 
-        ResponseEntity<DeletedResourcesResponse> result = mp3Controller.deleteResourcesByIds(ids);
+        ResponseEntity<DeletedResourceIdsResponse> result = mp3Controller.deleteResourcesByIds(ids);
 
         assertEquals(ResponseEntity.ok(response), result);
         verify(csvValidator).validate(ids);

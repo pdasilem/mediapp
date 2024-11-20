@@ -1,8 +1,9 @@
 package com.pdasilem.resourceservice.service.impl;
 
-import com.pdasilem.resourceservice.dto.DeletedResourcesResponse;
-import com.pdasilem.resourceservice.dto.ResourceIdResponse;
+import com.pdasilem.resourceservice.dto.DeletedResourceIdsResponse;
+import com.pdasilem.resourceservice.dto.IdResponse;
 import com.pdasilem.resourceservice.dto.SongMetadataDto;
+import com.pdasilem.resourceservice.exception.InternalServerException;
 import com.pdasilem.resourceservice.exception.ResourceNotFoundException;
 import com.pdasilem.resourceservice.model.Mp3Model;
 import com.pdasilem.resourceservice.repository.Mp3Repository;
@@ -15,73 +16,68 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Arrays;
+import java.util.Objects;
 
-        @Service
-        @RequiredArgsConstructor
-        public class Mp3Service implements ResourceService {
+@Service
+@RequiredArgsConstructor
+public class Mp3Service implements ResourceService {
 
-            private final Mp3MetadataExtractor metadataExtractor;
-            private final Mp3Repository repository;
-            private final MetadataService metadataService;
+    private final Mp3MetadataExtractor metadataExtractor;
+    private final Mp3Repository repository;
+    private final MetadataService metadataService;
 
-            @Transactional
-            @Override
-            public ResourceIdResponse saveResource(byte[] audioData) {
+    @Transactional
+    @Override
+    public IdResponse saveResource(byte[] audioData) {
 
-                var metadata = metadataExtractor.extractMetadata(audioData);
-                var mp3Model = createMp3Model(audioData);
-                var savedRes = repository.save(mp3Model);
-                var savedResId = savedRes.getId();
-                var durationInMinSec = convertDuration(metadata.get("xmpDM:duration"));
+        var mp3Model = createMp3Model(audioData);
+        var savedResourceId = repository.save(mp3Model).getId();
 
-                var metadataDto = createMetadataDto(savedResId, metadata, durationInMinSec);
-                metadataService.sendMetadata(metadataDto);
-                return new ResourceIdResponse(savedResId);
-            }
+        var metadataDto = createMetadataDto(savedResourceId,
+                metadataExtractor.extractMetadata(audioData));
+        metadataService.sendMetadata(metadataDto);
+        return new IdResponse(savedResourceId);
+    }
 
-            @Override
-            public byte[] getResourceById(Integer id) {
-                return repository.findById(id).map(Mp3Model::getData)
-                        .orElseThrow(() -> new ResourceNotFoundException(
-                                String.format("The resource with the specified %s does not exist", id)));
-            }
+    @Override
+    public byte[] getResourceById(Integer id) {
+        return repository.findById(id).map(Mp3Model::getData)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        String.format("Resource with ID=%s not found", id)));
+    }
 
-            @Transactional
-            @Override
-            public DeletedResourcesResponse deleteResourceByIds(String id) {
+    @Transactional
+    @Override
+    public DeletedResourceIdsResponse deleteResourceByIds(String id) {
 
-                var idsList = Arrays.stream(id.split(","))
-                        .map(Integer::valueOf)
-                        .toList();
+        var idsList = Arrays.stream(id.split(","))
+                .map(Integer::valueOf)
+                .toList();
 
-                var deletedIds = repository.deleteByIdIn(idsList).stream().map(Mp3Model::getId).toList();
-                metadataService.deleteMetadata(id);
+        var deletedIds = repository.deleteByIdIn(idsList).stream().map(Mp3Model::getId).toList();
+        var deletedSongIdsResponse = metadataService.deleteMetadata(id);
+        var deletedSongIds = deletedSongIdsResponse.ids();
 
-                return new DeletedResourcesResponse(deletedIds);
-            }
-
-            private Mp3Model createMp3Model(byte[] data) {
-                var model = new Mp3Model();
-                model.setData(data);
-                return model;
-
-            }
-
-            private String convertDuration(String duration) {
-                var length = Double.parseDouble(duration);
-                var minutes = (int) length / 60;
-                var seconds = (int) length % 60;
-                return minutes + ":" + (seconds > 9 ? seconds : "0" + seconds);
-            }
-
-            private SongMetadataDto createMetadataDto(Integer savedResult, Metadata metadata, String durationInMinSec) {
-                return SongMetadataDto.builder()
-                        .resourceId(savedResult)
-                        .artist(metadata.get("xmpDM:artist"))
-                        .album(metadata.get("xmpDM:album"))
-                        .name(metadata.get("dc:title"))
-                        .length(durationInMinSec)
-                        .year(Integer.parseInt(metadata.get("xmpDM:releaseDate")))
-                        .build();
-            }
+        if (!Objects.equals(deletedIds, deletedSongIds)) {
+            throw new InternalServerException("Ids deletion operation failed");
         }
+        return new DeletedResourceIdsResponse(deletedIds);
+    }
+
+    private Mp3Model createMp3Model(byte[] data) {
+        var model = new Mp3Model();
+        model.setData(data);
+        return model;
+    }
+
+    private SongMetadataDto createMetadataDto(Integer resourceId, Metadata metadata) {
+        return SongMetadataDto.builder()
+                .id(resourceId)
+                .artist(metadata.get("xmpDM:artist"))
+                .album(metadata.get("xmpDM:album"))
+                .name(metadata.get("dc:title"))
+                .duration(metadata.get("xmpDM:duration"))
+                .year(metadata.get("xmpDM:releaseDate"))
+                .build();
+    }
+}

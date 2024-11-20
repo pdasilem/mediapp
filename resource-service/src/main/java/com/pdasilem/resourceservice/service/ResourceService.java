@@ -1,13 +1,13 @@
 package com.pdasilem.resourceservice.service;
 
-import com.pdasilem.resourceservice.dto.DeletedResourcesResponse;
-import com.pdasilem.resourceservice.dto.ResourceIdResponse;
+import com.pdasilem.resourceservice.dto.DeletedResourceIdsResponse;
+import com.pdasilem.resourceservice.dto.IdResponse;
 
 public interface ResourceService {
 
-    ResourceIdResponse saveResource(byte[] audioData);
+    IdResponse saveResource(byte[] audioData);
 
     byte[] getResourceById(Integer id);
 
-    DeletedResourcesResponse deleteResourceByIds(String id);
+    DeletedResourceIdsResponse deleteResourceByIds(String id);
 }

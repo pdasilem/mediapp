@@ -1,16 +1,13 @@
 package com.pdasilem.resourceservice.service;
 
-import com.pdasilem.resourceservice.dto.SongIdsResponse;
-import com.pdasilem.resourceservice.integration.SongServiceClient;
 import com.pdasilem.resourceservice.dto.SongIdResponse;
+import com.pdasilem.resourceservice.dto.SongIdsResponse;
 import com.pdasilem.resourceservice.dto.SongMetadataDto;
+import com.pdasilem.resourceservice.integration.SongServiceClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(propagation = Propagation.NOT_SUPPORTED)
 @RequiredArgsConstructor
 public class MetadataService {
 

@@ -3,6 +3,7 @@ package com.pdasilem.songservice.controller;
 import com.pdasilem.songservice.dto.SongIdResponse;
 import com.pdasilem.songservice.dto.SongIdsResponse;
 import com.pdasilem.songservice.dto.SongMetadataDto;
+import com.pdasilem.songservice.dto.SongMetadataRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -34,7 +35,7 @@ public interface SongController {
     @PostMapping(value = "", consumes = "application/json", produces = "application/json")
     ResponseEntity<SongIdResponse> postSong(
             @Parameter(description = "Song metadata record, referencing to resource id (mp3 file itself)")
-            @Valid @RequestBody SongMetadataDto songMetadataDto);
+            @Valid @RequestBody SongMetadataRequest songMetadataRequest);
 
     @Operation(summary = "Get song metadata", description = "Get song metadata")
     @ApiResponses(value = {@ApiResponse(responseCode = "200", description = "Ok",

@@ -13,7 +13,7 @@ public class CsvValidator {
 
     public void validate(String text) {
         if (text.length() > MAX_LENGTH) {
-            throw new InvalidCsvException("CSV length exceeds maximum of 200 symbols");
+            throw new InvalidCsvException("CSV duration exceeds maximum of 200 symbols");
         }
 
         if (!CSV_PATTERN.matcher(text).matches()) {

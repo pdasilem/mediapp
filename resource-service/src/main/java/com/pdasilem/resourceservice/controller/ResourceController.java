@@ -1,7 +1,7 @@
 package com.pdasilem.resourceservice.controller;
 
-import com.pdasilem.resourceservice.dto.DeletedResourcesResponse;
-import com.pdasilem.resourceservice.dto.ResourceIdResponse;
+import com.pdasilem.resourceservice.dto.DeletedResourceIdsResponse;
+import com.pdasilem.resourceservice.dto.IdResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,14 +24,14 @@ public interface ResourceController {
             description = "Returns Integer id — ID of the created resource")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Ok",
-            content = @Content(schema = @Schema(implementation = ResourceIdResponse.class))),
+            content = @Content(schema = @Schema(implementation = IdResponse.class))),
             @ApiResponse(responseCode = "400", description = "Validation failed or request body is invalid MP3",
             content = @Content),
             @ApiResponse(responseCode = "500", description = "An internal server error has occurred",
             content = @Content)
     })
     @PostMapping(consumes = "audio/mpeg", produces = "application/json")
-    ResponseEntity<ResourceIdResponse> uploadResource(@RequestBody byte[] audioData);
+    ResponseEntity<IdResponse> uploadResource(@RequestBody byte[] audioData);
 
     @Operation(summary = "Get resource by id",
             description = "Returns audio bytes of the resource")
@@ -50,12 +50,12 @@ public interface ResourceController {
                 description = "Returns ids of deleted resources")
         @ApiResponses(value = {
                 @ApiResponse(responseCode = "200", description = "Ok",
-                        content = @Content(schema = @Schema(implementation = DeletedResourcesResponse.class))),
+                        content = @Content(schema = @Schema(implementation = DeletedResourceIdsResponse.class))),
                 @ApiResponse(responseCode = "500", description = "An internal server error has occurred",
                         content = @Content)
         })
         @DeleteMapping(produces = "application/json")
-        ResponseEntity<DeletedResourcesResponse> deleteResourcesByIds(
+        ResponseEntity<DeletedResourceIdsResponse> deleteResourcesByIds(
                 @Parameter(description = "CSV of song metadata IDs to remove",
                 content = @Content(mediaType = "text/csv"),
                 schema = @Schema(type = "string")) @RequestParam String id);

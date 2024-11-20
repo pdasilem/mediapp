@@ -1,4 +1,4 @@
-package com.pdasilem.songservice.exception;
+package com.pdasilem.songservice.exception.response;
 
 import lombok.Builder;
 

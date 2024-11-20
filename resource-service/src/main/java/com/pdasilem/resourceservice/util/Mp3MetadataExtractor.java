@@ -19,7 +19,6 @@ public class Mp3MetadataExtractor {
 
     public Metadata extractMetadata(byte[] mp3File) {
         try {
-
             var inputStream = new ByteArrayInputStream(mp3File);
 
             ContentHandler contentHandler = new DefaultHandler();

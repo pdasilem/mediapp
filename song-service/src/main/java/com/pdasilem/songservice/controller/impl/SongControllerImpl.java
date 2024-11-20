@@ -4,7 +4,7 @@ import com.pdasilem.songservice.controller.SongController;
 import com.pdasilem.songservice.dto.SongIdResponse;
 import com.pdasilem.songservice.dto.SongIdsResponse;
 import com.pdasilem.songservice.dto.SongMetadataDto;
-import com.pdasilem.songservice.exception.ResourceNotFoundException;
+import com.pdasilem.songservice.dto.SongMetadataRequest;
 import com.pdasilem.songservice.service.SongService;
 import com.pdasilem.songservice.util.CsvValidator;
 import lombok.RequiredArgsConstructor;
@@ -21,16 +21,13 @@ public class SongControllerImpl implements SongController {
     private final CsvValidator csvValidator;
 
     @Override
-    public ResponseEntity<SongIdResponse> postSong(SongMetadataDto songMetadataDto) {
-        return ResponseEntity.ok(songService.saveSongMetadata(songMetadataDto));
+    public ResponseEntity<SongIdResponse> postSong(SongMetadataRequest songMetadataRequest) {
+        return ResponseEntity.ok(songService.saveSongMetadata(songMetadataRequest));
     }
 
     @Override
     public ResponseEntity<SongMetadataDto> getSongById(Integer id) {
-        var result = songService.getSongMetadataById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(String
-                        .format("The resource with the specified %s does not exist", id.toString())));
-        return ResponseEntity.ok(result);
+        return ResponseEntity.ok(songService.getSongMetadataById(id));
 
     }
 

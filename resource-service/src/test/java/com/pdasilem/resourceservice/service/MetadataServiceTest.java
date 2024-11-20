@@ -3,7 +3,6 @@ package com.pdasilem.resourceservice.service;
 import com.pdasilem.resourceservice.dto.SongIdResponse;
 import com.pdasilem.resourceservice.dto.SongMetadataDto;
 import com.pdasilem.resourceservice.integration.SongServiceClient;
-import com.pdasilem.resourceservice.service.MetadataService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,12 +29,11 @@ class MetadataServiceTest {
     @BeforeEach
     void setUp() {
         songMetadataDto = SongMetadataDto.builder()
-                .resourceId(1)
                 .artist("Artist")
                 .album("Album")
                 .name("Song")
-                .length("3:45")
-                .year(2021)
+                .duration("3:45")
+                .year("2021")
                 .build();
 
         songIdResponse = new SongIdResponse(1);

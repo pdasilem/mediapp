@@ -3,28 +3,36 @@ package com.pdasilem.songservice.service;
 import com.pdasilem.songservice.dto.SongIdResponse;
 import com.pdasilem.songservice.dto.SongIdsResponse;
 import com.pdasilem.songservice.dto.SongMetadataDto;
+import com.pdasilem.songservice.dto.SongMetadataRequest;
+import com.pdasilem.songservice.exception.MetadataAlreadyExistsException;
 import com.pdasilem.songservice.mapper.SongIdMapper;
 import com.pdasilem.songservice.mapper.SongMetadataMapper;
 import com.pdasilem.songservice.model.SongMetadata;
 import com.pdasilem.songservice.repository.SongRepository;
 import com.pdasilem.songservice.service.impl.SongServiceImpl;
+import com.pdasilem.songservice.util.SongMetadataValidator;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class SongServiceImplTest {
+
     @Mock
     private SongRepository songRepository;
 
@@ -34,89 +42,67 @@ class SongServiceImplTest {
     @Mock
     private SongIdMapper songIdMapper;
 
+    @Mock
+    private SongMetadataValidator songMetadataValidator;
+
     @InjectMocks
     private SongServiceImpl songService;
 
-    @Test
-    void testSaveSongMetadata_Success() {
-        // Arrange
-        SongMetadataDto songMetadataDto = new SongMetadataDto("Song", "Artist", "Album", "3:30", 1, 2023);
-        SongMetadata songMetadata = new SongMetadata();
+    private SongMetadataRequest songMetadataRequest;
+    private SongMetadataDto songMetadataDto;
+    private SongMetadata songMetadata;
+    private SongIdResponse songIdResponse;
+
+    @BeforeEach
+    void setUp() {
+        songMetadataRequest = new SongMetadataRequest("1", "Title", "Artist", "Album", "3:30", "2023");
+        songMetadataDto = new SongMetadataDto(1, "Title", "Artist", "Album", "3:30", 2023);
+
+        songMetadata = new SongMetadata();
         songMetadata.setId(1);
-        when(songMetadataMapper.dtoToModel(any(SongMetadataDto.class))).thenReturn(songMetadata);
-        when(songRepository.save(any(SongMetadata.class))).thenReturn(songMetadata);
-        when(songIdMapper.modelToDto(any(Integer.class))).thenReturn(new SongIdResponse(1));
+        songMetadata.setName("Title");
+        songMetadata.setArtist("Artist");
+        songMetadata.setAlbum("Album");
+        songMetadata.setYear(2023);
 
-        // Act
-        SongIdResponse result = songService.saveSongMetadata(songMetadataDto);
-
-        // Assert
-        assertEquals(1, result.id());
+        songIdResponse = new SongIdResponse(1);
     }
 
     @Test
-    void testSaveSongMetadata_Error() {
-        // Arrange
-        SongMetadataDto songMetadataDto = new SongMetadataDto("Song", "Artist", "Album", "3:30", 1, 2023);
-        when(songMetadataMapper.dtoToModel(any(SongMetadataDto.class))).thenReturn(null);
+    void saveSongMetadata_shouldThrowException_whenMetadataAlreadyExists() {
+        when(songMetadataValidator.validateMetadata(any())).thenReturn(songMetadataDto);
+        when(songRepository.existsById(anyInt())).thenReturn(true);
 
-        // Act and Assert
-        assertThrows(NullPointerException.class, () -> songService.saveSongMetadata(songMetadataDto));
+        assertThrows(MetadataAlreadyExistsException.class, () -> songService.saveSongMetadata(songMetadataRequest));
+        verify(songRepository, never()).save(any());
     }
 
     @Test
-    void testGetSongMetadataById_Success() {
-        // Arrange
-        Integer id = 1;
-        SongMetadata songMetadata = new SongMetadata();
-        songMetadata.setId(id);
-        SongMetadataDto songMetadataDto = new SongMetadataDto("Song", "Artist", "Album", "3:30", 1, 2023);
-        when(songRepository.getById(any(Integer.class))).thenReturn(songMetadata);
-        when(songMetadataMapper.modelToDto(any(SongMetadata.class))).thenReturn(songMetadataDto);
+    void saveSongMetadata_shouldSaveMetadata_whenMetadataDoesNotExist() {
+        when(songMetadataValidator.validateMetadata(any())).thenReturn(songMetadataDto);
+        when(songRepository.existsById(anyInt())).thenReturn(false);
+        when(songRepository.save(any())).thenReturn(songMetadata);
+        when(songIdMapper.modelToDto(anyInt())).thenReturn(songIdResponse);
 
-        // Act
-        Optional<SongMetadataDto> result = songService.getSongMetadataById(id);
+        SongIdResponse response = songService.saveSongMetadata(songMetadataRequest);
 
-        // Assert
-        assertTrue(result.isPresent());
-        assertEquals(songMetadataDto, result.get());
+        assertNotNull(response);
+        assertEquals(1, response.id());
+        verify(songRepository).save(any());
     }
 
     @Test
-    void testGetSongMetadataById_NotFound() {
-        // Arrange
-        Integer id = 1;
-        when(songRepository.getById(any(Integer.class))).thenReturn(null);
+    void deleteSongMetadataByIds_shouldDeleteMetadata_whenIdsAreValid() {
+        List<SongMetadata> songsToDelete = List.of(songMetadata, songMetadata, songMetadata);
+        List<Integer> songIdsToDelete = List.of(1, 2, 3);
 
-        // Act
-        Optional<SongMetadataDto> result = songService.getSongMetadataById(id);
+        when(songRepository.findAllByIdIn(anyList())).thenReturn(songsToDelete);
+        when(songIdMapper.idListToDto(anyList())).thenReturn(new SongIdsResponse(songIdsToDelete));
 
-        // Assert
-        assertTrue(result.isEmpty());
-    }
+        SongIdsResponse response = songService.deleteSongMetadataByIds("1,2,3");
 
-    @Test
-    void testDeleteSongMetadataByIds_Success() {
-        // Arrange
-        String ids = "1,2,3";
-        List<Integer> idsList = Arrays.stream(ids.split(",")).map(Integer::valueOf).toList();
-        List<SongMetadata> songsToDelete = List.of(new SongMetadata(), new SongMetadata(), new SongMetadata());
-        when(songRepository.findAllByIds(anyList())).thenReturn(songsToDelete);
-        when(songIdMapper.idListToDto(anyList())).thenReturn(new SongIdsResponse(idsList));
-
-        // Act
-        SongIdsResponse result = songService.deleteSongMetadataByIds(ids);
-
-        // Assert
-        assertEquals(idsList, result.ids());
-    }
-
-    @Test
-    void testDeleteSongMetadataByIds_EmptyIds() {
-        // Arrange
-        String ids = "";
-
-        // Act and Assert
-        assertThrows(IllegalArgumentException.class, () -> songService.deleteSongMetadataByIds(ids));
+        assertNotNull(response);
+        assertEquals(songIdsToDelete, response.ids());
+        verify(songRepository).deleteByIdIn(anyList());
     }
 }

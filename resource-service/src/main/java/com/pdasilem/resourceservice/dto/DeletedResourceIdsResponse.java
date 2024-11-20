@@ -2,5 +2,5 @@ package com.pdasilem.resourceservice.dto;
 
 import java.util.List;
 
-public record DeletedResourcesResponse(List<Integer> ids) {
+public record DeletedResourceIdsResponse(List<Integer> ids) {
 }

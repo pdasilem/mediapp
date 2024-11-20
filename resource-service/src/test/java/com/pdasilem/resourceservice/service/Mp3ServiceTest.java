@@ -1,7 +1,8 @@
 package com.pdasilem.resourceservice.service;
 
-import com.pdasilem.resourceservice.dto.DeletedResourcesResponse;
-import com.pdasilem.resourceservice.dto.ResourceIdResponse;
+import com.pdasilem.resourceservice.dto.DeletedResourceIdsResponse;
+import com.pdasilem.resourceservice.dto.IdResponse;
+import com.pdasilem.resourceservice.dto.SongIdsResponse;
 import com.pdasilem.resourceservice.dto.SongMetadataDto;
 import com.pdasilem.resourceservice.exception.ResourceNotFoundException;
 import com.pdasilem.resourceservice.model.Mp3Model;
@@ -25,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -67,7 +69,7 @@ class Mp3ServiceTest {
         when(metadataExtractor.extractMetadata(audioData)).thenReturn(metadata);
         when(repository.save(any(Mp3Model.class))).thenReturn(mp3Model);
 
-        ResourceIdResponse response = mp3Service.saveResource(audioData);
+        IdResponse response = mp3Service.saveResource(audioData);
 
         assertNotNull(response);
         assertEquals(1, response.id());
@@ -93,12 +95,18 @@ class Mp3ServiceTest {
     @Test
     void deleteResourceByIds() {
         List<Integer> ids = Arrays.asList(1, 2, 3);
-        when(repository.deleteByIdIn(ids)).thenReturn(List.of(mp3Model));
+        List<Mp3Model> deletedModels = ids.stream().map(id -> {
+            Mp3Model model = new Mp3Model();
+            model.setId(id);
+            return model;
+        }).toList();
+        when(repository.deleteByIdIn(ids)).thenReturn(deletedModels);
+        when(metadataService.deleteMetadata(anyString())).thenReturn(new SongIdsResponse(ids));
 
-        DeletedResourcesResponse response = mp3Service.deleteResourceByIds("1,2,3");
+        DeletedResourceIdsResponse response = mp3Service.deleteResourceByIds("1,2,3");
 
         assertNotNull(response);
-        assertEquals(1, response.ids().size());
+        assertEquals(3, response.ids().size());
         verify(metadataService).deleteMetadata("1,2,3");
     }
 }
